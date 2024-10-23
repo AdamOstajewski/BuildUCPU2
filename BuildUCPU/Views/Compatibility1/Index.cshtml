@@ -1,0 +1,165 @@
+﻿@{
+    ViewData["Title"] = "Kompatybilność";
+}
+
+<style>
+    th, td {
+        text-align: left;
+        vertical-align: middle;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-collapse: collapse;
+    }
+
+    table {
+        width: 100%;
+        margin-top: 20px;
+    }
+</style>
+
+<h2>Kompatybilność</h2>
+<p>Sprawdź kompatybilność podzespołów.</p>
+
+<a id="chlodzenia-button" href="javascript:void(0)">Chłodzenia</a>
+<div id="chlodzenia-container" class="container" style="display:none;"></div>
+
+<a id="dyskiTwarde-button" href="javascript:void(0)">Dyski Twarde</a>
+<div id="dyskiTwarde-container" class="container" style="display:none;"></div>
+
+<a id="kartyGraficzne-button" href="javascript:void(0)">Karty Graficzne</a>
+<div id="kartyGraficzne-container" class="container" style="display:none;"></div>
+
+<a id="obudowy-button" href="javascript:void(0)">Obudowy</a>
+<div id="obudowy-container" class="container" style="display:none;"></div>
+
+<a id="ramy-button" href="javascript:void(0)">RAM-y</a>
+<div id="ramy-container" class="container" style="display:none;"></div>
+
+<a id="plytyGlowne-button" href="javascript:void(0)">Płyty Główne</a>
+<div id="plytyGlowne-container" class="container" style="display:none;"></div>
+
+<a id="procesory-button" href="javascript:void(0)">Procesory</a>
+<div id="procesory-container" class="container" style="display:none;"></div>
+
+<a id="zasilacze-button" href="javascript:void(0)">Zasilacze</a>
+<div id="zasilacze-container" class="container" style="display:none;"></div>
+
+<!-- Kontener dla wyświetlania zawartości -->
+<div class="content-container">
+    <button id="check-button" style="display:none; margin-top: 20px;">Sprawdzam</button>
+    <div id="selected-items-container"></div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            function loadTable(buttonId, containerId, url) {
+                $(buttonId).click(function () {
+                    if ($(containerId).is(':visible')) {
+                        $(containerId).slideUp();
+                    } else {
+                        $.ajax({
+                            url: url,
+                            type: 'GET',
+                            success: function (data) {
+                                var tempDiv = $('<div>').html(data);
+                                var table = tempDiv.find('table');
+
+                                // Wyświetlaj tylko Producenta, Model i Cenę w nagłówku
+                                table.find('thead tr').html(`
+                                                    <th>Zaznacz</th>
+                                                    <th>Producent</th>
+                                                    <th>Model</th>
+                                                    <th>Cena</th>
+                                                `);
+
+                                // Iteruj przez każdy wiersz i wybieraj odpowiednie dane (producent, model, cena)
+                                table.find('tbody tr').each(function () {
+                                    var tds = $(this).find('td');
+                                    // Załóżmy, że kolumny są w odpowiedniej kolejności: Producent (0), Model (1), Cena (2)
+                                    $(this).html(`
+                                                        <td><input type="checkbox" class="row-checkbox"></td>
+                                                        <td>${tds.eq(0).html()}</td> <!-- Producent -->
+                                                        <td>${tds.eq(1).html()}</td> <!-- Model -->
+                                                        <td>${tds.eq(2).html()} zł</td> <!-- Cena -->
+                                             `);
+                                });
+
+                                // Wstaw tabelę do kontenera
+                                $(containerId).html(table);
+                                $(containerId).slideDown();
+
+                                // Przewiń stronę do tabeli
+                                $('html, body').animate({
+                                    scrollTop: $(containerId).offset().top - 100
+                                }, 500);
+
+                                restoreSelection(containerId);
+                            },
+                            error: function () {
+                                alert('Wystąpił problem podczas ładowania danych.');
+                            }
+                        });
+                    }
+                });
+            }
+
+            function restoreSelection(containerId) {
+                var key = $(containerId).attr('id');
+                var selections = JSON.parse(localStorage.getItem('selections')) || {};
+
+                if (selections[key] && selections[key].length > 0) {
+                    var selectedRowIndex = selections[key][0];
+                    $(containerId).find('.row-checkbox[data-row-index="' + selectedRowIndex + '"]').prop('checked', true);
+                }
+            }
+
+            function showCheckButton() {
+                if ($('.row-checkbox:checked').length > 0) {
+                    $('#check-button').show();
+                } else {
+                    $('#check-button').hide();
+                }
+            }
+
+            $(document).on('change', '.row-checkbox', function () {
+                showCheckButton(); // Uaktualnij widoczność przycisku po zaznaczeniu
+            });
+
+            $('#check-button').click(function () {
+                var selectedRows = [];
+                $('.row-checkbox:checked').each(function () {
+                    var row = $(this).closest('tr');
+                    selectedRows.push(row);
+                });
+
+                // Jeśli zaznaczono jakiekolwiek wiersze
+                if (selectedRows.length > 0) {
+                    // Przekierowanie do Compatibility z przekazanymi danymi
+                    var componentData = selectedRows.map(function (row) {
+                        return row.find('td').slice(1, 4).text().trim(); // Zbieranie danych z komórek (Producent, Model, Cena)
+                    }).join(';'); // Łączenie danych w jeden ciąg
+
+                    // Przekierowanie do Compatibility z parametrami
+                    window.location.href = '/Compatibility?data=' + encodeURIComponent(componentData);
+                }
+            });
+
+            // Załaduj dane dla każdej kategorii
+            loadTable('#chlodzenia-button', '#chlodzenia-container', '@Url.Action("Index", "Chlodzenies")');
+            loadTable('#dyskiTwarde-button', '#dyskiTwarde-container', '@Url.Action("Index", "DyskiTwardes")');
+            loadTable('#kartyGraficzne-button', '#kartyGraficzne-container', '@Url.Action("Index", "KartyGraficznes")');
+            loadTable('#obudowy-button', '#obudowy-container', '@Url.Action("Index", "Obudowies")');
+            loadTable('#ramy-button', '#ramy-container', '@Url.Action("Index", "PamieciRams")');
+            loadTable('#plytyGlowne-button', '#plytyGlowne-container', '@Url.Action("Index", "PlytyGlownes")');
+            loadTable('#procesory-button', '#procesory-container', '@Url.Action("Index", "Procesories")');
+            loadTable('#zasilacze-button', '#zasilacze-container', '@Url.Action("Index", "Zasilaczes")');
+
+            // Wyczyść dane z localStorage przy przeładowaniu
+            $(window).on('beforeunload', function () {
+                localStorage.removeItem('selections');
+            });
+        });
+    </script>
+}

@@ -1,0 +1,93 @@
+﻿@{
+    ViewData["Title"] = "Kompatybilność";
+}
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kompatybilność</title>
+    <link rel="stylesheet" href="~/css/styles.css"> <!-- Upewnij się, że ścieżka do CSS jest poprawna -->
+    <style>
+        th, td {
+            text-align: left;
+            vertical-align: middle;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-collapse: collapse;
+        }
+
+        tbody{
+            margin-left: 10px;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .selected-items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .start-button {
+            text-align: center; /* Wyśrodkowuje przycisk */
+            margin-top: 20px; /* Dodaje przestrzeń nad przyciskiem */
+        }
+
+        .start-button-link {
+            background-color: rgba(0, 86, 179, 1);
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px; /* Zaokrągla krawędzie przycisku */
+        }
+
+            .start-button-link:hover {
+                background-color: rgba(0, 86, 179, 0.8); /* Efekt hover dla przycisku */
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Sprawdź Kompatybilność Podzespołów</h2>
+        <p>Aby sprawdzić kompatybilność, nakliknij przyciski</p>
+
+        @if (ViewBag.SelectedComponents != null && ViewBag.SelectedComponents.Length > 0)
+        {
+            <table class="selected-items-table">
+                <thead>
+                    <tr>
+                        <th>Wybrane Podzespoły</th> <!-- Dodaj nagłówek dla lepszej czytelności -->
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        // Zakładam, że komponenty są w formacie string z separatorami średnikami
+                        var components = string.Join(",", ViewBag.SelectedComponents).Split(';');
+                    }
+                    @foreach (var component in components)
+                    {
+                        if (!string.IsNullOrWhiteSpace(component)) // Sprawdzamy, czy komponent nie jest pusty
+                        {
+                            <tr>
+                                <td>@Html.Raw(component.Trim()) </td> <!-- Usuwamy dodatkowe spacje -->
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>Nie wybrano żadnych podzespołów.</p>
+        }
+
+        <div class="start-button">
+            <a href="Compatibility1" class="start-button-link">Wróć na stronę główną</a> <!-- Przyciski do powrotu -->
+        </div>
+    </div>
+</body>
+</html>
