@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kompatybilność</title>
-    <link rel="stylesheet" href="~/css/styles.css"> <!-- Upewnij się, że ścieżka do CSS jest poprawna -->
+    <link rel="stylesheet" href="~/css/styles.css">
     <style>
         th, td {
             text-align: left;
@@ -18,76 +18,65 @@
             border-collapse: collapse;
         }
 
-        tbody{
-            margin-left: 10px;
-        }
         table {
             width: 100%;
             margin-top: 20px;
         }
 
-        .selected-items-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
         .start-button {
-            text-align: center; /* Wyśrodkowuje przycisk */
-            margin-top: 20px; /* Dodaje przestrzeń nad przyciskiem */
+            margin-top: 20px;
+            text-align: center;
         }
 
         .start-button-link {
-            background-color: rgba(0, 86, 179, 1);
-            color: white;
             padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
             text-decoration: none;
-            border-radius: 5px; /* Zaokrągla krawędzie przycisku */
+            border-radius: 5px;
+            font-size: 16px;
         }
 
-            .start-button-link:hover {
-                background-color: rgba(0, 86, 179, 0.8); /* Efekt hover dla przycisku */
-            }
+        .start-button-link:hover {
+            background-color: #45a049;
+        }
+
+        .selected-items-table th {
+            background-color: #f2f2f2;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Sprawdź Kompatybilność Podzespołów</h2>
-        <p>Aby sprawdzić kompatybilność, nakliknij przyciski</p>
+    <h2>Wybrane Podzespoły</h2>
 
-        @if (ViewBag.SelectedComponents != null && ViewBag.SelectedComponents.Length > 0)
-        {
-            <table class="selected-items-table">
-                <thead>
-                    <tr>
-                        <th>Wybrane Podzespoły</th> <!-- Dodaj nagłówek dla lepszej czytelności -->
-                    </tr>
-                </thead>
-                <tbody>
-                    @{
-                        // Zakładam, że komponenty są w formacie string z separatorami średnikami
-                        var components = string.Join(",", ViewBag.SelectedComponents).Split(';');
-                    }
-                    @foreach (var component in components)
+    @if (ViewBag.SelectedComponents != null && ViewBag.SelectedComponents.Length > 0)
+    {
+        <table class="selected-items-table">
+            <thead>
+                <tr>
+                    <th>Wybrane Podzespoły</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var components = string.Join(",", ViewBag.SelectedComponents).Split(';');
+                }
+
+                @foreach (var component in components)
+                {
+                    if (!string.IsNullOrWhiteSpace(component))
                     {
-                        if (!string.IsNullOrWhiteSpace(component)) // Sprawdzamy, czy komponent nie jest pusty
-                        {
-                            <tr>
-                                <td>@Html.Raw(component.Trim()) </td> <!-- Usuwamy dodatkowe spacje -->
-                            </tr>
-                        }
+                        <tr>
+                            <td>@Html.Raw(component.Trim())</td>
+                        </tr>
                     }
-                </tbody>
-            </table>
-        }
-        else
-        {
-            <p>Nie wybrano żadnych podzespołów.</p>
-        }
+                }
+            </tbody>
+        </table>
+    }
 
-        <div class="start-button">
-            <a href="Compatibility1" class="start-button-link">Wróć na stronę główną</a> <!-- Przyciski do powrotu -->
-        </div>
+    <div class="start-button">
+        <a href="@Url.Action("Index", "Home")" class="start-button-link">Przejdź do strony głównej</a>
     </div>
 </body>
 </html>
